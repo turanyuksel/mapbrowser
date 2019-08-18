@@ -1,0 +1,35 @@
+version: "3.6"
+services:
+  reverseproxy:
+    build:
+      dockerfile: ./proxy.Dockerfile
+      context: .
+    depends_on:
+      - frontend
+    ports:
+      - 9080:80
+  frontend:
+    build:
+      dockerfile: Dockerfile
+      context: ../frontend
+    depends_on:
+      - backend
+      - database
+    expose:
+      - "80"
+  backend:
+    image: turanyuksel/geocounter:latest
+    environment:
+      - MONGO_DBNAME=popularity
+      - MONGO_HOST=database
+    expose:
+      - "8080"
+  database:
+    image: mongo:4.2
+    volumes:
+      - type: tmpfs
+        tmpfs:
+          size: 1000
+        target: /data
+    expose:
+      - "27017"
